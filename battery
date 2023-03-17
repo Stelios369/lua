@@ -1,0 +1,20 @@
+battery=dataref_table("sim/cockpit/electrical/battery_on")
+
+battery[0]=1
+
+  battery={}
+  battery.reference=XPLMFindDataRef("sim/cockpit/electrical/battery_array_on")
+  battery.reftype=XPLMGetDataRefTypes(battery.reference)
+  setmetatable(battery,DATAREF_META_TABLE)
+
+
+
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
