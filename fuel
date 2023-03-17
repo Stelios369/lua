@@ -1,0 +1,86 @@
+
+
+create_command("Langschwert/consumedfuel", "Langschwert show consumed fuel", "lw_show_cfuel = lw_show_cfuel + 1", "", "")
+dataref("lw_cfuel", "sim/cockpit2/fuel/fuel_totalizer_sum_kg", "readonly")
+
+
+local lw_show_cfuel = 0 				
+local lw_xPosOfcfuel = 0					
+local lw_yPosOfcfuel = 750				
+local lw_xPosOfTorqX = lw_xPosOfcfuel 	
+local lw_yPosOfTorqX = lw_yPosOfcfuel		
+local lw_xcfuel = lw_xPosOfcfuel + 15		
+local lw_ycfuel = lw_yPosOfcfuel 		
+local lw_cfuelbox_width = 160			
+local lw_letter = 10				
+local lw_cfuel_done = 0					
+local lw_cfuel_drag = 0					
+local lw_kt = 0							
+
+
+
+
+function ask_mouse_cfuel()
+
+	
+	if lw_show_cfuel == 0 and lw_cfuel_done == 0 and MOUSE_X > lw_xPosOfcfuel and MOUSE_X < lw_xPosOfcfuel + lw_letter and MOUSE_Y > lw_yPosOfcfuel and MOUSE_Y < lw_yPosOfcfuel + lw_letter and MOUSE_STATUS == "down" then
+		lw_show_cfuel = 1
+		lw_cfuel_done = 1
+	end
+
+
+	if lw_show_cfuel == 1 and lw_cfuel_done == 0 and MOUSE_X > lw_xPosOfTorqX and MOUSE_X < lw_xPosOfTorqX + lw_letter and MOUSE_Y > lw_ycfuel and MOUSE_Y < lw_ycfuel + lw_letter and MOUSE_STATUS == "down" then
+		lw_show_cfuel = 0
+		lw_cfuel_done = 1
+	end
+
+
+	if lw_show_cfuel == 1 and lw_cfuel_drag == 0 and	MOUSE_X > lw_xcfuel and MOUSE_X < lw_xcfuel + lw_cfuelbox_width and MOUSE_Y > lw_ycfuel and MOUSE_Y < lw_ycfuel + lw_letter then
+		RESUME_MOUSE_CLICK = true
+		lw_cfuel_drag = 1
+	end
+	
+ 	if lw_show_cfuel == 1 and lw_cfuel_drag == 1 and MOUSE_STATUS == "drag" then
+		lw_xcfuel = MOUSE_X
+		lw_ycfuel = MOUSE_Y
+		lw_xPosOfTorqX = lw_xcfuel - 15 
+	else
+	
+		lw_cfuel_drag = 0
+	end
+
+	
+	if 	lw_cfuel_done == 1 then 
+		lw_cfuel_done = 0
+	end
+
+end
+
+		
+function printcfuel()
+
+	if lw_show_cfuel > 1 then
+		lw_show_cfuel = 0
+	end
+	
+	if lw_show_cfuel == 0 then
+	
+		draw_string(lw_xPosOfcfuel, lw_yPosOfcfuel, "C", "white" )
+	else
+	
+		draw_string(lw_xPosOfTorqX, lw_ycfuel, "x", "red" )
+	end
+
+	if lw_show_cfuel == 1 then
+		draw_string(lw_xcfuel, lw_ycfuel, tonumber(string.format("%.2f", lw_cfuel)) .. " kg of fuel consumed", "green" )
+	end
+end
+
+
+
+do_on_mouse_click("ask_mouse_cfuel()")
+do_every_draw('printcfuel()')
+
+
+
+
