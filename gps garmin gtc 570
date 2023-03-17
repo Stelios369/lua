@@ -1,0 +1,429 @@
+if not SUPPORTS_FLOATING_WINDOWS then
+    logMsg("imgui not supported by your FlyWithLua version")
+    return
+end
+
+require("graphics")
+main = float_wnd_load_image(SCRIPT_DIRECTORY .. "/maingps.png")
+home = float_wnd_load_image(SCRIPT_DIRECTORY .. "/home.png")
+weather=float_wnd_load_image(SCRIPT_DIRECTORY .. "/weather.png")
+map=float_wnd_load_image(SCRIPT_DIRECTORY .. "/map.png")
+directto=float_wnd_load_image(SCRIPT_DIRECTORY .. "/directto.png")
+flightplan=float_wnd_load_image(SCRIPT_DIRECTORY .. "/flightplan.png")
+proc=float_wnd_load_image(SCRIPT_DIRECTORY .. "/proc.png")
+charts=float_wnd_load_image(SCRIPT_DIRECTORY .. "/charts.png")
+taws=float_wnd_load_image(SCRIPT_DIRECTORY .. "/taws.png")
+aircraftsystem=float_wnd_load_image(SCRIPT_DIRECTORY .. "/aircraftsystem.png")
+avionicssettings=float_wnd_load_image(SCRIPT_DIRECTORY .. "/avionicssettings.png")
+avionicsstatus=float_wnd_load_image(SCRIPT_DIRECTORY .. "/avionicsstatus.png")
+back=float_wnd_load_image(SCRIPT_DIRECTORY .. "/back.png")
+databasestatus=float_wnd_load_image(SCRIPT_DIRECTORY .. "/databasestatus.png")
+down=float_wnd_load_image(SCRIPT_DIRECTORY .. "/down.png")
+init=float_wnd_load_image(SCRIPT_DIRECTORY .. "/init.png")
+MSG=float_wnd_load_image(SCRIPT_DIRECTORY .. "/MSG.png")
+music=float_wnd_load_image(SCRIPT_DIRECTORY .. "/music.png")
+nearest=float_wnd_load_image(SCRIPT_DIRECTORY .. "/nearest.png")
+sirtusxminfo=float_wnd_load_image(SCRIPT_DIRECTORY .. "/sirtusxminfo.png")
+speedbugs=float_wnd_load_image(SCRIPT_DIRECTORY .. "/speedbugs.png")
+traffic=float_wnd_load_image(SCRIPT_DIRECTORY .. "/traffic.png")
+up=float_wnd_load_image(SCRIPT_DIRECTORY .. "/up.png")
+utillities=float_wnd_load_image(SCRIPT_DIRECTORY .. "/utillities.png")
+waypointinfo=float_wnd_load_image(SCRIPT_DIRECTORY .. "/waypointinfo.png")
+audio=float_wnd_load_image(SCRIPT_DIRECTORY .. "/audio.png")
+intercom=float_wnd_load_image(SCRIPT_DIRECTORY .. "/intercom.png")
+mic=float_wnd_load_image(SCRIPT_DIRECTORY .. "/mic.png")
+mon=float_wnd_load_image(SCRIPT_DIRECTORY .. "/mon.png")
+xport=float_wnd_load_image(SCRIPT_DIRECTORY .. "/xport.png")
+blue=float_wnd_load_image(SCRIPT_DIRECTORY .. "/blue.png")
+radio_com1_com2=float_wnd_load_image(SCRIPT_DIRECTORY .. "/radiocom1com2.png")
+stby1_stby2=float_wnd_load_image(SCRIPT_DIRECTORY .. "/clean.png")
+
+
+DataRef("cam_heading", "sim/graphics/view/view_heading")
+DataRef("view_width", "sim/graphics/view/window_width")
+DataRef("view_height", "sim/graphics/view/window_height")
+screen_center_x = view_width / 2
+screen_center_y = view_height / 2
+win_height = 0
+win_width = 0
+win_x = 0
+win_y = 0
+win_show = false
+local visibility=true
+local com1_freq=0
+local com2_freq=0
+local stby1_freq=0
+local stby2_freq=0
+local command_run=false
+
+
+function mouse_wheel_up(wnd,x,y)
+ 
+mouse_wheel=MOUSE_WHEEL_CLICKS
+ if mouse_wheel==1 and not command_run then 
+  command_once("sim/radios/stby_com1_fine_up")
+  command_run=true
+  MOUSE_WHEEL_CLICKS=MOUSE_WHEEL_CLICKS+1
+  command_run=false
+ end
+
+end
+
+function mouse_wheel_down(wnd,x,y)
+mouse_wheel=MOUSE_WHEEL_CLICKS
+  if mouse_wheel==-1  and not command_run then 
+   command_once("sim/radios/stby_com1_fine_down")
+   command_run=true
+   MOUSE_WHEEL_CLICKS=MOUSE_WHEEL_CLICKS-1
+   command_run=false
+  end
+
+end
+   
+
+
+
+function radio_com1_show(wnd,x,y,radio_com1_com2)
+    imgui.SetCursorPos(124,82)
+    imgui.Image(radio_com1_com2,63,42)
+    imgui.SetCursorPos(130,85)
+    com1_freq=get("sim/cockpit/radios/com1_freq_hz")
+    imgui.SetWindowFontScale(1.25)
+    imgui.TextUnformatted("com1: ")
+    imgui.SetCursorPos(127,100)
+    imgui.SetWindowFontScale(1.25)
+    imgui.PushStyleColor(imgui.constant.Col.Text, 0xFF00FF00)
+    imgui.TextUnformatted(string.format(com1_freq/100,"%7.2f"))
+    imgui.PopStyleColor()
+
+end
+
+function radio_com2_show(wnd,x,y,radio_com1_com2)
+    imgui.SetCursorPos(244,82)
+    imgui.Image(radio_com1_com2,63,42)
+    imgui.SetCursorPos(250,85)
+    com2_freq=get("sim/cockpit/radios/com2_freq_hz")
+    imgui.SetWindowFontScale(1.25)
+    imgui.TextUnformatted("com2: ")
+    imgui.SetCursorPos(248,100)
+    imgui.SetWindowFontScale(1.25)
+    imgui.PushStyleColor(imgui.constant.Col.Text, 0xFF00FF00)
+    imgui.TextUnformatted(string.format(com2_freq/100,"%7.2f"))
+    imgui.PopStyleColor()
+
+end
+
+
+function stby_show(wnd,x,y,stby1_stby2)
+ imgui.SetCursorPos(122,128) 
+ imgui.Image(stby1_stby2,63,42) 
+ imgui.SetCursorPos(128,131)
+ stby1_freq=get("sim/cockpit/radios/com1_stdby_freq_hz")
+ imgui.SetWindowFontScale(1.25)
+ imgui.TextUnformatted("STBY: ")
+ imgui.SetCursorPos(126,145)
+ imgui.SetWindowFontScale(1.25)
+ imgui.PushStyleColor(imgui.constant.Col.Text, 0xFF00FF00)
+ imgui.TextUnformatted(string.format(stby1_freq/100,"%7.2f"))
+ imgui.PopStyleColor()
+
+
+end
+
+
+function stby_show2(wnd,x,y,stby1_stby2)
+ imgui.SetCursorPos(242,128) 
+ imgui.Image(stby1_stby2,63,42)
+ imgui.SetCursorPos(248,131)
+ stby2_freq=get("sim/cockpit/radios/com2_stdby_freq_hz")
+ imgui.SetWindowFontScale(1.25)
+ imgui.TextUnformatted("STBY: ")
+ imgui.SetCursorPos(246,145)
+ imgui.SetWindowFontScale(1.25)
+ imgui.PushStyleColor(imgui.constant.Col.Text, 0xFF00FF00)
+ imgui.TextUnformatted(string.format(stby2_freq/100,"%7.2f"))
+ imgui.PopStyleColor()
+ 
+end
+
+
+
+
+function message_show(wnd,x,y,MSG,map)
+    imgui.SetCursorPos(180,390) 
+    msg2=imgui.ImageButton(MSG,38,37)
+    if  msg2==true then
+    MSG=command_once("sim/electrical/battery_1_toggle")
+    visibility=true
+    
+    
+    end
+end
+
+
+function map_show(wnd,x,y,map)  --- NA EMFANIZETAI MESA STO GPS
+  imgui.SetCursorPos(64,195)    
+  map2=imgui.ImageButton(map,63,42)
+ 
+  if  map2==true then
+    command_once("sim/GPS/g1000n3_popup")
+
+
+
+    end
+  end
+
+
+
+function home_hide(wnd,x,y)
+  if visibility==true then
+  imgui.SetCursorPos(145,176) 
+  home2=imgui.Image(home,135,15)
+  imgui.SetCursorPos(139,195) 
+  traffic2=imgui.ImageButton(traffic,63,42)
+  if  traffic2==true then
+    visibility=false
+   
+   
+  end
+  
+  end
+  
+end
+
+
+
+
+--[[function map_show(wnd,x,y,map)
+  imgui.SetCursorPos(64,195) 
+ map2=imgui.ImageButton(map,63,42)
+  if map2==true then
+      
+         
+  end
+  
+  
+
+end
+
+
+
+
+function traffic_show(wnd,x,y,traffic)
+  imgui.SetCursorPos(139,195) 
+ traffic2=imgui.ImageButton(traffic,63,42)
+  if traffic2==true then
+    
+    end
+end
+--]]
+
+
+function weather_show(wnd,x,y,weather)
+
+  imgui.SetCursorPos(214,195) 
+  weather2=imgui.ImageButton(weather,63,42)
+  if weather2==true then
+    
+    end
+
+end
+
+function taws_show(wnd,x,y,taws)
+
+  imgui.SetCursorPos(290,195) 
+  taws2=imgui.ImageButton(taws,63,42)
+  if taws2==true then
+    
+    end
+
+end
+
+
+function directto_show(wnd,x,y,directto)
+
+  imgui.SetCursorPos(64,244) 
+  direct_to2=imgui.ImageButton(directto,63,42)
+  if direct_to2==true then
+    
+    end
+
+end
+
+function flightplan_show(wnd,x,y,flightplan)
+  imgui.SetCursorPos(139,244) 
+  flight_plan2=imgui.ImageButton(flightplan,63,42)
+  if flight_plan2==true then
+    
+    end
+
+end
+function proc_show(wnd,x,y,proc)
+  imgui.SetCursorPos(214,244) 
+  proc2=imgui.ImageButton(proc,63,42)
+  if proc2==true then
+    
+    end
+
+end
+
+function charts_show(wnd,x,y,charts)
+  imgui.SetCursorPos(290,244) 
+  charts2=imgui.ImageButton(charts,63,42)
+  if charts2==true then
+    
+    end
+
+end
+
+
+
+
+    
+
+function draw_window(wnd, x, y)
+    win_width = imgui.GetWindowWidth()
+    win_height = imgui.GetWindowHeight()
+    win_x = x 
+    win_y = y 
+    imgui.Image(main, 400, 580)
+    imgui.SetCursorPos(62,82)
+    imgui.ImageButton(audio,50,40) 
+    imgui.SetCursorPos(62,128) 
+    imgui.ImageButton(intercom,50,40) 
+    radio_com1_show(wnd,x,y,radio_com1_com2)
+    radio_com2_show(wnd,x,y,radio_com1_com2)
+    stby_show(wnd,x,y,stby1_stby2)
+    stby_show2(wnd,x,y,stby1_stby2) 
+    imgui.SetCursorPos(192,82) 
+    imgui.ImageButton(mic,40,40) 
+    imgui.SetCursorPos(192,128) 
+    imgui.ImageButton(mon,40,40) 
+    imgui.SetCursorPos(312,82) 
+    imgui.ImageButton(xport,40,40) 
+    
+   
+    home_hide(wnd,x,y,home)
+   
+    map_show(wnd,x,y,map)
+    --traffic_show(wnd,x,y,traffic)
+    weather_show(wnd,x,y,weather)
+    taws_show(wnd,x,y,taws)
+    directto_show(wnd,x,y,directto)
+    flightplan_show(wnd,x,y,flightplan)
+    proc_show(wnd,x,y,proc)
+    charts_show(wnd,x,y,charts)
+    
+    imgui.SetCursorPos(110,294) 
+    imgui.ImageButton(aircraftsystem,50,40)
+    imgui.SetCursorPos(170,294) 
+    imgui.ImageButton(music,50,40)
+    imgui.SetCursorPos(230,294) 
+    imgui.ImageButton(utillities,50,40)
+    imgui.SetCursorPos(110,342) 
+    imgui.ImageButton(speedbugs,50,40)
+    imgui.SetCursorPos(170,342) 
+    imgui.ImageButton(waypointinfo,50,40)
+    imgui.SetCursorPos(230,342) 
+    imgui.ImageButton(nearest,50,40)
+    
+    imgui.SetCursorPos(60,390) 
+    imgui.Image(blue,305,42)
+    
+    imgui.SetCursorPos(120,390) 
+    imgui.ImageButton(init,38,37)
+    message_show(wnd,x,y,MSG)
+    
+   
+ --  mouse_wheel_up(wnd,x,y)
+   mouse_wheel_down(wnd,x,y)
+   
+
+
+
+end
+
+
+
+function closed_demo(wnd)
+    win_show=false
+  
+end
+
+
+ function wnd_click(wnd, x,y)   ----NA ANEBAINEI KAI NA KATEYAINEI ME RODELA 
+  
+ 
+      
+   if (x>285 and x<300 and  y<100 and y>50) then
+           mouse_wheel_up(wnd,x,y)        
+       --stby1_freq=command_once("sim/radios/stby_com1_coarse_up")
+        --stby2_freq=command_once("sim/radios/stby_com2_coarse_up")
+          --com1_freq=command_once("sim/radios/actv_com1_fine_up")
+          --com2_freq=command_once("sim/radios/actv_com2_fine_up")
+         
+       elseif (x>330 and x<350 and y<100 and y>50) then
+  
+       stby1_freq=command_once("sim/radios/stby_com1_coarse_down")
+       stby2_freq=command_once("sim/radios/stby_com2_coarse_down")
+          --com1_freq=command_once("sim/radios/actv_com1_fine_down")
+         --com2_freq=command_once("sim/radios/actv_com2_fine_down")
+         
+      else
+      
+          end
+
+
+   if (x>300 and x<320 and y<100 and y>50) then
+      choise=command_once("sim/GPS/g1000n1_com12")
+ 
+  end
+   
+
+  
+end
+   
+
+
+
+function create_wnd()
+    win_show=true
+    main_wnd = float_wnd_create(415, 600, 1, true)
+    float_wnd_set_title(main_wnd, "GPS")
+    float_wnd_set_imgui_builder(main_wnd, "draw_window")
+    float_wnd_set_onclose(main_wnd, "closed_demo")
+    float_wnd_set_resizing_limits(main_wnd, 415, 600, 420, 600)
+    float_wnd_set_onclick(main_wnd, "wnd_click")
+end
+
+
+
+
+
+create_wnd()
+
+add_macro( "Show GPS Window", "create_wnd()" )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
